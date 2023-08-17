@@ -2,7 +2,7 @@ import type { Page } from 'puppeteer';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
-import { GAME_URL } from './constants';
+import { GAME_URL } from './utilities/constants';
 import { logger } from './utilities/logger';
 
 puppeteer.use(StealthPlugin());

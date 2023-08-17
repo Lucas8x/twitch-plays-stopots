@@ -4,44 +4,13 @@ import {
   COMMAND_PREFIX,
   COMMAND_DELIMITER,
   MAX_ANSWER_LENGTH,
-} from './constants';
+} from './utilities/constants';
 import { logger } from './utilities/logger';
+import { AnswersController } from './controllerrs/AnswersController';
 
-const usersAnswers: CategoryAnswers = {
-  filme: {
-    amount: 2,
-    value: 'harry potter',
-    users: [],
-  },
-  nome: {
-    amount: 1,
-    value: 'lucas',
-    users: [],
-  },
-};
+const answersManager = new AnswersController();
 
 const currentRoundCategories: string[] = [];
-
-function addToUsersAnswers(category: string, answer: string, user: string) {
-  try {
-    const categoryData = usersAnswers[category];
-    if (!categoryData) {
-      usersAnswers[category] = {
-        amount: 1,
-        users: [user],
-        value: answer,
-      };
-      return;
-    }
-    const userAlreadyAnswered = categoryData.users.includes(user);
-    if (userAlreadyAnswered) return;
-
-    categoryData.amount++;
-    categoryData.users.push(user);
-  } catch (error) {
-    logger.error(String(error));
-  }
-}
 
 function handleMessage(message: string) {
   try {
@@ -80,7 +49,7 @@ async function main() {
       const user = tags.username;
       if (!user) return;
 
-      addToUsersAnswers(
+      answersManager.addAnswer(
         messageValidation.category,
         messageValidation.answer,
         user
