@@ -6,7 +6,7 @@ import {
   MAX_ANSWER_LENGTH,
 } from './utilities/constants';
 import { logger } from './utilities/logger';
-import { AnswersController } from './controllerrs/AnswersController';
+import { AnswersController } from './controllers/AnswersController';
 
 const answersManager = new AnswersController();
 
