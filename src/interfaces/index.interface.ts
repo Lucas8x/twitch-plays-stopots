@@ -1,8 +1,8 @@
-interface Answer {
+interface IAnswer {
   value: string;
   users: string[];
 }
 
-interface CategoryAnswers {
-  [category: string]: Answer[];
+interface ICategoryAnswers {
+  [category: string]: IAnswer[];
 }

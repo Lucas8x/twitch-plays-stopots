@@ -1,5 +1,6 @@
 import { client } from './twitch';
-import { Browser } from './browser';
+import { PuppeteerBrowser } from './browsers/puppeteer';
+import { WebdriverBrowser } from './browsers/webdriver';
 import {
   COMMAND_PREFIX,
   COMMAND_DELIMITER,
@@ -39,7 +40,7 @@ function handleMessage(message: string) {
 
 async function main() {
   try {
-    const browser = new Browser();
+    const browser = new PuppeteerBrowser();
     await browser.launch();
 
     client.on('message', (channel, tags, message, self) => {
