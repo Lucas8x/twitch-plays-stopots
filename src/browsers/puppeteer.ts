@@ -9,7 +9,7 @@ puppeteer.use(StealthPlugin());
 
 interface Options {}
 
-export class PuppeteerBrowser {
+export class PuppeteerBrowser implements BaseBrowser {
   private currentLetter = '';
   private currentPage: Page | undefined;
 
@@ -75,14 +75,29 @@ export class PuppeteerBrowser {
     }
   }
 
-  public writeAnswers() {
+  public async writeAnswers() {
     try {
-    } catch (error) {}
+      if (!this.currentPage) {
+        throw Error('NO CURRENT PAGE');
+      }
+
+      const defaultGameCategoriesSize = 13;
+
+      for (let i = 1; i < defaultGameCategoriesSize; i++) {
+        const fieldInput = await this.currentPage.waitForXPath(
+          constants.FIELD_INPUT(i)
+        );
+      }
+    } catch (error) {
+      logger.error('[Browser] Failed fill answers.', String(error));
+    }
   }
 
   public validateAnswers() {
     try {
-    } catch (error) {}
+    } catch (error) {
+      logger.error('[Browser] Failed to validate answers.', String(error));
+    }
   }
 
   private async autoReady() {
@@ -117,16 +132,52 @@ export class PuppeteerBrowser {
     }
   }
 
-  private checkAfk() {
+  private async checkAfk() {
     try {
     } catch (error) {}
   }
 
+  private async detectCurrentLetter() {
+    try {
+      if (!this.currentPage) {
+        throw Error('NO CURRENT PAGE');
+      }
+      const letterElement = await this.currentPage.waitForXPath(
+        constants.LETTER
+      );
+      if (!letterElement) return;
+
+      const letterTextContent = await letterElement.getProperty('textContent');
+      if (!letterTextContent) return;
+
+      const letterText = await letterTextContent.jsonValue();
+      if (!letterText) return;
+
+      this.currentLetter = letterText;
+    } catch (error) {
+      logger.error('[Browser] Failed to detect current letter', String(error));
+    }
+  }
+
+  private async detectButtonState() {
+    try {
+      await this.detectCurrentLetter();
+    } catch (error) {
+      logger.error('[Browser] Failed to detect button state', String(error));
+    }
+  }
+
   private async loop() {
     try {
-      setInterval(async () => {
-        this.autoReady();
-      }, 3000);
+      setInterval(
+        async () =>
+          Promise.all([
+            await this.detectButtonState(),
+            await this.autoReady(),
+            await this.checkAfk(),
+          ]),
+        3000
+      );
     } catch (error) {}
   }
 
