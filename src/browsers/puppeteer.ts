@@ -1,4 +1,4 @@
-import type { MouseButton, Page } from 'puppeteer';
+import type { Page } from 'puppeteer';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
@@ -19,6 +19,18 @@ export class PuppeteerBrowser implements BaseBrowser {
     try {
       if (this.avatar === 0) return;
     } catch (error) {}
+  }
+
+  private async clearInput(input) {
+    if (!this.currentPage) {
+      throw Error('NO CURRENT PAGE');
+    }
+    await input.click();
+    await input.focus();
+    await this.currentPage.keyboard.down('Control');
+    await this.currentPage.keyboard.press('A');
+    await this.currentPage.keyboard.up('Control');
+    await this.currentPage.keyboard.press('Backspace');
   }
 
   private async joinGame() {
@@ -47,16 +59,8 @@ export class PuppeteerBrowser implements BaseBrowser {
         throw Error("COULDN'T FIND INPUT");
       }
 
-      await usernameInput.click();
-      await usernameInput.focus();
-
-      await this.currentPage.keyboard.down('Control');
-      await this.currentPage.keyboard.press('A');
-      await this.currentPage.keyboard.up('Control');
-      await this.currentPage.keyboard.press('Backspace');
-
+      await this.clearInput(usernameInput);
       await usernameInput.type('Toichi');
-
       await this.changeAvatar();
 
       const playButton = await this.currentPage.waitForXPath(
@@ -75,18 +79,45 @@ export class PuppeteerBrowser implements BaseBrowser {
     }
   }
 
-  public async writeAnswers() {
+  public async writeAnswers(data: IWriteAnswersParams) {
     try {
       if (!this.currentPage) {
         throw Error('NO CURRENT PAGE');
       }
 
-      const defaultGameCategoriesSize = 13;
+      const defaultGameCategoriesSize = 13; //TODO: detect with xpath
 
       for (let i = 1; i < defaultGameCategoriesSize; i++) {
-        const fieldInput = await this.currentPage.waitForXPath(
+        const categoryElement = await this.currentPage.waitForXPath(
+          constants.FIELD_CATEGORY(i),
+          { timeout: 0 }
+        );
+        if (!categoryElement) continue;
+
+        const categoryContent = await categoryElement.getProperty(
+          'textContent'
+        );
+        const category = categoryContent.remoteObject().value;
+        if (!category) continue;
+
+        const [fieldInput] = await this.currentPage.$x(
           constants.FIELD_INPUT(i)
         );
+
+        const inputValue = await this.currentPage.evaluate(
+          (x) => x.value,
+          fieldInput
+        );
+
+        const answer = data[String(category).toLowerCase()].toLowerCase();
+        if (!answer) continue;
+
+        if (inputValue && String(inputValue).toLowerCase() === answer) {
+          continue;
+        }
+        logger.log(`[Game] Filling ${category} with ${answer}`);
+        await this.clearInput(fieldInput);
+        await fieldInput.type(answer);
       }
     } catch (error) {
       logger.error('[Browser] Failed fill answers.', String(error));
@@ -154,6 +185,9 @@ export class PuppeteerBrowser implements BaseBrowser {
       if (!letterText) return;
 
       this.currentLetter = letterText;
+      if (this.currentLetter !== letterText) {
+        logger.info(`[Game] Letter changed to ${letterText}`);
+      }
     } catch (error) {
       logger.error('[Browser] Failed to detect current letter', String(error));
     }
@@ -161,7 +195,28 @@ export class PuppeteerBrowser implements BaseBrowser {
 
   private async detectButtonState() {
     try {
-      await this.detectCurrentLetter();
+      if (!this.currentLetter) return;
+      if (!this.currentPage) {
+        throw Error('NO CURRENT PAGE');
+      }
+
+      const button = await this.currentPage.waitForXPath(
+        constants.YELLOW_BUTTON,
+        { timeout: 0 }
+      );
+      if (!button) return;
+
+      const buttonTextContent = await button.getProperty('textContent');
+      const buttonTextValue = buttonTextContent.remoteObject().value;
+      if (!buttonTextValue) return;
+
+      switch (String(buttonTextValue).toUpperCase()) {
+        case 'STOP!':
+          await this.writeAnswers();
+          break;
+        case 'AVALIAR':
+          break;
+      }
     } catch (error) {
       logger.error('[Browser] Failed to detect button state', String(error));
     }
@@ -172,6 +227,7 @@ export class PuppeteerBrowser implements BaseBrowser {
       setInterval(
         async () =>
           Promise.all([
+            await this.detectCurrentLetter(),
             await this.detectButtonState(),
             await this.autoReady(),
             await this.checkAfk(),

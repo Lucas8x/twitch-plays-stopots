@@ -1,12 +1,16 @@
 {
-  "name": "twitchplays",
+  "name": "twitch-plays-stopots",
   "version": "1.0.0",
   "description": "",
   "type": "module",
   "scripts": {
     "start": "npx tsx src/index.ts"
   },
-  "keywords": [],
+  "keywords": [
+    "twitch",
+    "plays",
+    "stopots"
+  ],
   "author": "lucas8x",
   "license": "MIT",
   "devDependencies": {

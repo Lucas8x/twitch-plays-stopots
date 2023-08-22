@@ -12,8 +12,10 @@ export const USERNAME_INPUT = '//*[@class="perfil"]//input';
 export const PLAY_BUTTON =
   '//*[@class="actions"]/button[@class="bt-yellow icon-exclamation"]';
 
-//
+// COMMON ELEMENTS
 export const LETTER = '//*[@id="letter"]/span';
+export const YELLOW_BUTTON =
+  '//*[@class= "bt-yellow icon-exclamation"or @class="bt-yellow icon-exclamation shake" or @class="bt-yellow icon-exclamation disable"]/strong';
 export const YELLOW_BUTTON_CLICKABLE =
   '//*[@class="bt-yellow icon-exclamation" or @class="bt-yellow icon-exclamation shake"]';
 export const READY_BUTTON = `${YELLOW_BUTTON_CLICKABLE}/strong`;
