@@ -1,4 +1,4 @@
-interface IWriteAnswersParams {
+interface IGetAnswersResponse {
   [category: string]: string;
 }
 

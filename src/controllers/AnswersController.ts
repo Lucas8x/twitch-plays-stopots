@@ -1,6 +1,11 @@
 export class AnswersController {
   private answers: ICategoryAnswers = {};
+
   constructor() {}
+
+  public getAnswers(): ICategoryAnswers {
+    return this.answers;
+  }
 
   private categoryExists = (category: string) => !!this.answers[category];
 

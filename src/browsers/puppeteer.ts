@@ -4,16 +4,25 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
 import * as constants from '../utilities/constants';
 import { logger } from '../utilities/logger';
+import { filterAnswers } from '../utilities/utils';
 
 puppeteer.use(StealthPlugin());
 
-interface Options {}
+interface Options {
+  avatar?: number;
+  onGetAnswers: () => ICategoryAnswers;
+}
 
 export class PuppeteerBrowser implements BaseBrowser {
   private currentLetter = '';
   private currentPage: Page | undefined;
+  private avatar: number;
+  private onGetAnswers: () => ICategoryAnswers;
 
-  constructor(private avatar = 0) {}
+  constructor({ avatar, onGetAnswers }: Options) {
+    this.avatar = avatar || 0;
+    this.onGetAnswers = onGetAnswers;
+  }
 
   private async changeAvatar() {
     try {
@@ -79,11 +88,12 @@ export class PuppeteerBrowser implements BaseBrowser {
     }
   }
 
-  public async writeAnswers(data: IWriteAnswersParams) {
+  public async writeAnswers(data: IGetAnswersResponse) {
     try {
       if (!this.currentPage) {
         throw Error('NO CURRENT PAGE');
       }
+      if (!data || Object.keys(data).length === 0) return;
 
       const defaultGameCategoriesSize = 13; //TODO: detect with xpath
 
@@ -97,8 +107,12 @@ export class PuppeteerBrowser implements BaseBrowser {
         const categoryContent = await categoryElement.getProperty(
           'textContent'
         );
-        const category = categoryContent.remoteObject().value;
-        if (!category) continue;
+        const categoryValue = categoryContent.remoteObject().value;
+        const category = categoryValue && String(categoryValue).toLowerCase();
+        if (!category || !(category in data)) continue;
+
+        const answer = data[category].toLowerCase();
+        if (!answer) continue;
 
         const [fieldInput] = await this.currentPage.$x(
           constants.FIELD_INPUT(i)
@@ -108,9 +122,6 @@ export class PuppeteerBrowser implements BaseBrowser {
           (x) => x.value,
           fieldInput
         );
-
-        const answer = data[String(category).toLowerCase()].toLowerCase();
-        if (!answer) continue;
 
         if (inputValue && String(inputValue).toLowerCase() === answer) {
           continue;
@@ -212,7 +223,9 @@ export class PuppeteerBrowser implements BaseBrowser {
 
       switch (String(buttonTextValue).toUpperCase()) {
         case 'STOP!':
-          await this.writeAnswers();
+          await this.writeAnswers(
+            filterAnswers(this.currentLetter, this.onGetAnswers())
+          );
           break;
         case 'AVALIAR':
           break;

@@ -40,7 +40,9 @@ function handleMessage(message: string) {
 
 async function main() {
   try {
-    const browser = new PuppeteerBrowser();
+    const browser = new PuppeteerBrowser({
+      onGetAnswers: () => answersManager.getAnswers(),
+    });
     await browser.launch();
 
     client.on('message', (channel, tags, message, self) => {
