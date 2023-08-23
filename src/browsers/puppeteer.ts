@@ -201,7 +201,7 @@ export class PuppeteerBrowser implements BaseBrowser {
       const letterText = await letterTextContent.jsonValue();
       if (!letterText) return;
 
-      if (this.currentLetter !== letterText) {
+      if (this.currentLetter !== letterText && letterText !== '?') {
         this.onClearAnswer();
         gameLog.info(`Letter changed to ${letterText}`);
       }
