@@ -3,8 +3,11 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
 import * as constants from '../utilities/constants';
-import { logger } from '../utilities/logger';
+import { Logger } from '../utilities/logger';
 import { filterAnswers } from '../utilities/utils';
+
+const gameLog = new Logger(' [GME] ', '#FFBF3F');
+const browserLog = new Logger(' [BSR] ', '#019D30');
 
 puppeteer.use(StealthPlugin());
 
@@ -47,7 +50,7 @@ export class PuppeteerBrowser implements BaseBrowser {
 
   private async joinGame() {
     try {
-      logger.log('[Game] Joining game...');
+      gameLog.info('Joining game...');
       if (!this.currentPage) {
         throw Error('NO CURRENT PAGE');
       }
@@ -85,9 +88,9 @@ export class PuppeteerBrowser implements BaseBrowser {
       await new Promise((r) => setTimeout(r, 2000));
       await playButton.click();
 
-      logger.log('[Game] Successfully joined game.');
+      gameLog.info('Successfully joined game.');
     } catch (error) {
-      logger.error('[Browser] Failed to join game.', String(error));
+      browserLog.error('Failed to join game.', String(error));
     }
   }
 
@@ -129,19 +132,19 @@ export class PuppeteerBrowser implements BaseBrowser {
         if (inputValue && String(inputValue).toLowerCase() === answer) {
           continue;
         }
-        logger.log(`[Game] Filling ${category} with ${answer}`);
+        gameLog.info(`Filling ${category} with ${answer}`);
         await this.clearInput(fieldInput);
         await fieldInput.type(answer);
       }
     } catch (error) {
-      logger.error('[Browser] Failed fill answers.', String(error));
+      browserLog.error('Failed fill answers.', String(error));
     }
   }
 
   public validateAnswers() {
     try {
     } catch (error) {
-      logger.error('[Browser] Failed to validate answers.', String(error));
+      browserLog.error('Failed to validate answers.', String(error));
     }
   }
 
@@ -173,7 +176,7 @@ export class PuppeteerBrowser implements BaseBrowser {
 
       await readyButtonClickable.click();
     } catch (error) {
-      logger.error("[Browser] Couldn't' press ready.", String(error));
+      browserLog.error("Couldn't' press ready.", String(error));
     }
   }
 
@@ -198,13 +201,13 @@ export class PuppeteerBrowser implements BaseBrowser {
       const letterText = await letterTextContent.jsonValue();
       if (!letterText) return;
 
-      this.currentLetter = letterText;
       if (this.currentLetter !== letterText) {
         this.onClearAnswer();
-        logger.info(`[Game] Letter changed to ${letterText}`);
+        gameLog.info(`Letter changed to ${letterText}`);
       }
+      this.currentLetter = letterText;
     } catch (error) {
-      logger.error('[Browser] Failed to detect current letter', String(error));
+      browserLog.error('Failed to detect current letter', String(error));
     }
   }
 
@@ -227,15 +230,15 @@ export class PuppeteerBrowser implements BaseBrowser {
 
       switch (String(buttonTextValue).toUpperCase()) {
         case 'STOP!':
-          await this.writeAnswers(
-            filterAnswers(this.currentLetter, this.onGetAnswers())
-          );
+          const answers = this.onGetAnswers();
+          const filteredAnswers = filterAnswers(this.currentLetter, answers);
+          await this.writeAnswers(filteredAnswers);
           break;
         case 'AVALIAR':
           break;
       }
     } catch (error) {
-      logger.error('[Browser] Failed to detect button state', String(error));
+      browserLog.error('Failed to detect button state', String(error));
     }
   }
 
@@ -256,7 +259,7 @@ export class PuppeteerBrowser implements BaseBrowser {
 
   public async launch() {
     try {
-      logger.log('[Browser] Launching...');
+      browserLog.info('Launching...');
       const browser = await puppeteer.launch({ headless: false });
       const pages = await browser.pages();
 
@@ -270,7 +273,7 @@ export class PuppeteerBrowser implements BaseBrowser {
       await this.joinGame();
       await this.loop();
     } catch (error) {
-      logger.error('[Browser] Failed to launch.', String(error));
+      browserLog.error('Failed to launch.', String(error));
     }
   }
 }

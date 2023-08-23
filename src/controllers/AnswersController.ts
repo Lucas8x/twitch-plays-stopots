@@ -1,3 +1,7 @@
+import { Logger } from '../utilities/logger';
+
+const logger = new Logger(' [ASW] ');
+
 export class AnswersController {
   private answers: ICategoryAnswers = {};
 
@@ -9,6 +13,7 @@ export class AnswersController {
 
   public clearAnswers() {
     this.answers = {};
+    logger.info('Answers cleared.');
   }
 
   private categoryExists = (category: string) => !!this.answers[category];
@@ -37,6 +42,10 @@ export class AnswersController {
       } else {
         categoryAnswers.push({ value: answer, users: [user] });
       }
-    } catch (error) {}
+
+      logger.info(`New answer by ${user} - ${category} - ${answer}`);
+    } catch (error) {
+      logger.error(String(error));
+    }
   }
 }

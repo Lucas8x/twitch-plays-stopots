@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { client } from './twitch';
 import { PuppeteerBrowser } from './browsers/puppeteer';
 import { WebdriverBrowser } from './browsers/webdriver';
@@ -5,9 +6,13 @@ import {
   COMMAND_PREFIX,
   COMMAND_DELIMITER,
   MAX_ANSWER_LENGTH,
+  MIN_ANSWER_LENGTH,
 } from './utilities/constants';
 import { logger } from './utilities/logger';
 import { AnswersController } from './controllers/AnswersController';
+import { initializeServer } from './fakeChat';
+
+const USE_FAKE_TEST_CHAT = true;
 
 const answersManager = new AnswersController();
 
@@ -18,12 +23,14 @@ function handleMessage(message: string) {
 
     const category = message
       .substring(COMMAND_PREFIX.length, message.indexOf(COMMAND_DELIMITER))
-      .trim();
+      ?.trim();
+    if (!category) return;
 
     const answer = message
       .split(COMMAND_DELIMITER)[1]
-      .trim()
+      ?.trim()
       .substring(0, MAX_ANSWER_LENGTH);
+    if (!answer || answer.length < MIN_ANSWER_LENGTH) return;
 
     return {
       category,
@@ -32,6 +39,13 @@ function handleMessage(message: string) {
   } catch (error) {
     logger.error(String(error));
   }
+}
+
+function addAnswer(username: string, rawMessage: string) {
+  const messageValidation = handleMessage(rawMessage);
+  if (!messageValidation) return;
+  const { category, answer } = messageValidation;
+  answersManager.addAnswer(category, answer, username);
 }
 
 async function main() {
@@ -43,16 +57,16 @@ async function main() {
     await browser.launch();
 
     client.on('message', (channel, tags, message, self) => {
-      const messageValidation = handleMessage(message);
-      if (!messageValidation) return;
-
       const user = tags.username;
       if (!user) return;
-
-      const { category, answer } = messageValidation;
-      logger.info(`${user} - ${category} - ${answer}`);
-      answersManager.addAnswer(category, answer, user);
+      addAnswer(user, message);
     });
+
+    if (USE_FAKE_TEST_CHAT) {
+      initializeServer({
+        onMessage: addAnswer,
+      });
+    }
 
     await client.connect();
   } catch (error) {

@@ -11,4 +11,30 @@ const error = (...message: string[]) =>
 
 const log = console.log;
 
-export const logger = { info, warn, error, log };
+class Logger {
+  constructor(private prefix: string, private hex = '#fff') {}
+
+  info = (...message: string[]) =>
+    console.info(
+      chalk.bgHex(this.hex).bold(this.prefix),
+      chalk.bgMagenta.bold(' INFO '),
+      ...message
+    );
+
+  warn = (...message: string[]) =>
+    console.error(
+      chalk.bgHex(this.hex).bold(this.prefix),
+      chalk.bgYellow.bold(' WARN '),
+      ...message
+    );
+
+  error = (...message: string[]) =>
+    console.error(
+      chalk.bgHex(this.hex).bold(this.prefix),
+      chalk.bgRed.bold(' ERROR '),
+      ...message
+    );
+}
+
+const logger = { info, warn, error, log };
+export { Logger, logger };
