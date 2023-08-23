@@ -11,8 +11,6 @@ import { AnswersController } from './controllers/AnswersController';
 
 const answersManager = new AnswersController();
 
-const currentRoundCategories: string[] = [];
-
 function handleMessage(message: string) {
   try {
     message = message.trim().toLowerCase();
@@ -21,8 +19,6 @@ function handleMessage(message: string) {
     const category = message
       .substring(COMMAND_PREFIX.length, message.indexOf(COMMAND_DELIMITER))
       .trim();
-
-    if (!currentRoundCategories.includes(category)) return;
 
     const answer = message
       .split(COMMAND_DELIMITER)[1]
@@ -42,6 +38,7 @@ async function main() {
   try {
     const browser = new PuppeteerBrowser({
       onGetAnswers: () => answersManager.getAnswers(),
+      onClearAnswer: () => answersManager.clearAnswers(),
     });
     await browser.launch();
 
@@ -52,14 +49,12 @@ async function main() {
       const user = tags.username;
       if (!user) return;
 
-      answersManager.addAnswer(
-        messageValidation.category,
-        messageValidation.answer,
-        user
-      );
+      const { category, answer } = messageValidation;
+      logger.info(`${user} - ${category} - ${answer}`);
+      answersManager.addAnswer(category, answer, user);
     });
 
-    //await client.connect();
+    await client.connect();
   } catch (error) {
     console.error(error);
   }

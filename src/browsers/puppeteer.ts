@@ -11,6 +11,7 @@ puppeteer.use(StealthPlugin());
 interface Options {
   avatar?: number;
   onGetAnswers: () => ICategoryAnswers;
+  onClearAnswer: () => void;
 }
 
 export class PuppeteerBrowser implements BaseBrowser {
@@ -18,10 +19,12 @@ export class PuppeteerBrowser implements BaseBrowser {
   private currentPage: Page | undefined;
   private avatar: number;
   private onGetAnswers: () => ICategoryAnswers;
+  private onClearAnswer: () => void;
 
-  constructor({ avatar, onGetAnswers }: Options) {
+  constructor({ avatar, onGetAnswers, onClearAnswer }: Options) {
     this.avatar = avatar || 0;
     this.onGetAnswers = onGetAnswers;
+    this.onClearAnswer = onClearAnswer;
   }
 
   private async changeAvatar() {
@@ -197,6 +200,7 @@ export class PuppeteerBrowser implements BaseBrowser {
 
       this.currentLetter = letterText;
       if (this.currentLetter !== letterText) {
+        this.onClearAnswer();
         logger.info(`[Game] Letter changed to ${letterText}`);
       }
     } catch (error) {

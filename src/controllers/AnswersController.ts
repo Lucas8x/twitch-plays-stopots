@@ -7,6 +7,10 @@ export class AnswersController {
     return this.answers;
   }
 
+  public clearAnswers() {
+    this.answers = {};
+  }
+
   private categoryExists = (category: string) => !!this.answers[category];
 
   public addAnswer(category: string, answer: string, user: string) {
@@ -34,9 +38,5 @@ export class AnswersController {
         categoryAnswers.push({ value: answer, users: [user] });
       }
     } catch (error) {}
-  }
-
-  public clearAnswers() {
-    this.answers = {};
   }
 }
