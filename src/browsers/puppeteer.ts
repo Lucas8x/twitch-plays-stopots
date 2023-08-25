@@ -4,7 +4,7 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
 import * as constants from '../utilities/constants';
 import { Logger } from '../utilities/logger';
-import { filterAnswers } from '../utilities/utils';
+import { filterAnswers, normalizeCategory } from '../utilities/utils';
 
 const gameLog = new Logger(' [GME] ', '#FFBF3F');
 const browserLog = new Logger(' [BSR] ', '#019D30');
@@ -114,7 +114,9 @@ export class PuppeteerBrowser implements BaseBrowser {
           'textContent'
         );
         const categoryValue = categoryContent.remoteObject().value;
-        const category = categoryValue && String(categoryValue).toLowerCase();
+        const category =
+          categoryValue &&
+          normalizeCategory(String(categoryValue).toLowerCase());
         if (!category || !(category in data)) continue;
 
         const answer = data[category].toLowerCase();
@@ -260,7 +262,10 @@ export class PuppeteerBrowser implements BaseBrowser {
   public async launch() {
     try {
       browserLog.info('Launching...');
-      const browser = await puppeteer.launch({ headless: false });
+      const browser = await puppeteer.launch({
+        headless: false,
+        timeout: 0,
+      });
       const pages = await browser.pages();
 
       let page = pages[0];

@@ -5,12 +5,23 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Twitch Plays Stopots Test Chat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
   </head>
 
   <body>
     <main id="container">
       <input id="username" placeholder="Username" />
-      <textarea id="message" placeholder="Message"></textarea>
+      <textarea
+        id="message"
+        placeholder="Your message
+!nome:lucas
+!comida saudável:laranja
+      "
+      ></textarea>
       <button id="send" onclick="send()">Send</button>
     </main>
   </body>
@@ -30,12 +41,24 @@
           message,
         }),
       })
-        .then(() => {})
+        .then(() => {
+          Toastify({
+            text: 'Successfully sent your message.',
+          }).showToast();
+        })
         .catch((err) => {
+          Toastify({
+            text: err,
+          }).showToast();
           console.error(err);
         });
     }
   </script>
+
+  <script
+    type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/toastify-js"
+  ></script>
 
   <style>
     * {

@@ -11,6 +11,7 @@ import {
 import { logger } from './utilities/logger';
 import { AnswersController } from './controllers/AnswersController';
 import { initializeServer } from './fakeChat';
+import { normalizeCategory } from './utilities/utils';
 
 const USE_FAKE_TEST_CHAT = true;
 
@@ -21,9 +22,10 @@ function handleMessage(message: string) {
     message = message.trim().toLowerCase();
     if (!message.startsWith(COMMAND_PREFIX)) return;
 
-    const category = message
+    let category = message
       .substring(COMMAND_PREFIX.length, message.indexOf(COMMAND_DELIMITER))
       ?.trim();
+    category = normalizeCategory(category);
     if (!category) return;
 
     const answer = message

@@ -18,3 +18,7 @@ export function filterAnswers(letter: string, answers: ICategoryAnswers) {
 
   return finalAnswers;
 }
+
+export function normalizeCategory(category: string) {
+  return category.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
