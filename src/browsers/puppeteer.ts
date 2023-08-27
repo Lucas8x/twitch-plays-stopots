@@ -268,10 +268,7 @@ export class PuppeteerBrowser implements BaseBrowser {
       });
       const pages = await browser.pages();
 
-      let page = pages[0];
-      if (pages.length === 0) {
-        page = await browser.newPage();
-      }
+      const page = pages.length ? pages[0] : await browser.newPage();
       this.currentPage = page;
 
       await page.goto(constants.GAME_URL);

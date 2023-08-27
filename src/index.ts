@@ -13,7 +13,7 @@ import { AnswersController } from './controllers/AnswersController';
 import { initializeServer } from './fakeChat';
 import { normalizeCategory } from './utilities/utils';
 
-const USE_FAKE_TEST_CHAT = true;
+const USE_FAKE_TEST_CHAT = false;
 
 const answersManager = new AnswersController();
 

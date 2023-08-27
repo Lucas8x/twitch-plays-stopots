@@ -5,7 +5,7 @@ const logger = new Logger(' [TMI] ', '#A970FF');
 
 const client = new tmi.Client({
   options: {
-    debug: true,
+    debug: false,
   },
   connection: {
     secure: true,
@@ -15,12 +15,12 @@ const client = new tmi.Client({
   logger,
 });
 
-client.addListener('connected', (address, port) => {
+client.addListener('connected', () => {
   logger.info('Connected! Waiting for messages...');
 });
 
 client.addListener('disconnected', (reason) => {
-  logger.warn('Disconnected from the server! Reason: ' + reason);
+  logger.warn(`Disconnected from the server! Reason: ${reason}`);
 });
 
 export { client };
