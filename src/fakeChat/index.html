@@ -27,32 +27,48 @@
   </body>
 
   <script>
-    function send() {
-      const username = document.getElementById('username').value;
-      const message = document.getElementById('message');
+    const textarea = document.getElementById('message');
+    textarea.addEventListener('keydown', handleTextareaEnter);
 
-      fetch('/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username,
-          message: message.value,
-        }),
-      })
-        .then(() => {
-          Toastify({
-            text: 'Successfully sent your message.',
-          }).showToast();
-          message.value = '';
-        })
-        .catch((err) => {
-          Toastify({
-            text: err,
-          }).showToast();
-          console.error(err);
+    async function send() {
+      const username = document.getElementById('username').value;
+
+      if (!textarea.value.length) {
+        Toastify({
+          text: 'Please enter your message.',
+        }).showToast();
+        return;
+      }
+
+      try {
+        await fetch('/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username,
+            message: textarea.value,
+          }),
         });
+
+        Toastify({
+          text: 'Successfully sent your message.',
+        }).showToast();
+        textarea.value = '';
+      } catch (error) {
+        Toastify({
+          text: error,
+        }).showToast();
+        console.error(error);
+      }
+    }
+
+    function handleTextareaEnter(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        send();
+      }
     }
   </script>
 
