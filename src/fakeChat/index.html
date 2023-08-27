@@ -29,7 +29,7 @@
   <script>
     function send() {
       const username = document.getElementById('username').value;
-      const message = document.getElementById('message').value;
+      const message = document.getElementById('message');
 
       fetch('/', {
         method: 'POST',
@@ -38,13 +38,14 @@
         },
         body: JSON.stringify({
           username,
-          message,
+          message: message.value,
         }),
       })
         .then(() => {
           Toastify({
             text: 'Successfully sent your message.',
           }).showToast();
+          message.value = '';
         })
         .catch((err) => {
           Toastify({
