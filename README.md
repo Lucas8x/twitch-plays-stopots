@@ -1,6 +1,6 @@
 # Twitch Plays StopotS
 
-Use [tmi.js](https://github.com/tmijs/tmi.js) to allow live stream viewers send answers on the chat to be used in stopots game.
+Use [tmi.js](https://github.com/tmijs/tmi.js) to allow live stream viewers send answers on the chat to be used in [stopots](https://stopots.com) game.
 
 ## Requirements
 
