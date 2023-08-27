@@ -266,12 +266,33 @@ export class PuppeteerBrowser implements BaseBrowser {
         headless: false,
         timeout: 0,
       });
+
       const pages = await browser.pages();
 
       const page = pages.length ? pages[0] : await browser.newPage();
+
+      const gameLang = constants.GAME_LANGUAGES.find(
+        (i) => i.value === process.env.GAME_LANGUAGE
+      );
+
+      if (!gameLang) {
+        gameLog.warn(
+          'Game language not found or incorrect. Defaulting to Site/Browser auto detection.'
+        );
+      } else {
+        await page.setExtraHTTPHeaders({
+          'Accept-Language': gameLang.value,
+        });
+        gameLog.info(`Game language set to ${gameLang.text}`);
+      }
+
       this.currentPage = page;
 
-      await page.goto(constants.GAME_URL);
+      await page.goto(
+        gameLang
+          ? new URL(gameLang.value, constants.GAME_URL).toString()
+          : constants.GAME_URL
+      );
       await this.joinGame();
       await this.loop();
     } catch (error) {

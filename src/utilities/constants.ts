@@ -1,7 +1,17 @@
 // SETTINGS
-export const GAME_URL = 'https://stopots.com.br/';
+export const GAME_URL = 'https://stopots.com';
 export const COMMAND_PREFIX = process.env.COMMAND_PREFIX || '!';
 export const COMMAND_DELIMITER = process.env.COMMAND_DELIMITER || ':';
+export const GAME_LANGUAGES = [
+  { value: 'id', text: 'Bahasa' },
+  { value: 'ca', text: 'Català' },
+  { value: 'de', text: 'Deutsch' },
+  { value: 'en', text: 'English' },
+  { value: 'es', text: 'Español' },
+  { value: 'fr', text: 'Français' },
+  { value: 'it', text: 'Italiano' },
+  { value: 'pt', text: 'Português' },
+];
 
 export const MIN_ANSWER_LENGTH = 2;
 export const MAX_ANSWER_LENGTH = 20;
