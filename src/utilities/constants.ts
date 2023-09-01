@@ -30,7 +30,32 @@ export const YELLOW_BUTTON =
 export const YELLOW_BUTTON_CLICKABLE =
   '//*[@class="bt-yellow icon-exclamation" or @class="bt-yellow icon-exclamation shake"]';
 export const READY_BUTTON = `${YELLOW_BUTTON_CLICKABLE}/strong`;
-export const READY_BUTTON_TEXT = 'ESTOU PRONTO';
+
+export const READY_BUTTON_TEXTS = [
+  'SAYA SIAP', //id
+  'ESTIC A PUNT', //ca
+  'ICH BIN BEREIT', //de
+  "I'M READY", //en
+  'ESTOY LISTO', //es
+  'JE SUIS PRÊT(E)', //fr
+  'SONO PRONTO', //it
+  'ESTOU PRONTO', //pt
+];
+export const STOP_BUTTON_TEXTS = [
+  'STOP!', //id, ca, en, es, it, pt
+  'STOPP!', //de
+  'STOP !', //fr
+];
+export const VALIDATE_BUTTON_TEXTS = [
+  'NILAI', //id
+  'PUNTUA', //ca
+  'BEWERTEN', //de
+  'RATE', //EN
+  'EVALUAR', //es
+  'ÉVALUER', //fr
+  'VALUTARE', //it
+  'AVALIAR', //pt
+];
 
 // FILL ANSWERS SCREEN
 const label =

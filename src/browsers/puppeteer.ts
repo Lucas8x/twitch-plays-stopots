@@ -1,4 +1,4 @@
-import type { Page } from 'puppeteer';
+import type { ElementHandle, Page } from 'puppeteer';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
@@ -12,7 +12,7 @@ const browserLog = new Logger(' [BSR] ', '#019D30');
 puppeteer.use(StealthPlugin());
 
 interface Options {
-  avatar?: number;
+  avatar?: number | string | undefined;
   onGetAnswers: () => ICategoryAnswers;
   onClearAnswer: () => void;
 }
@@ -20,7 +20,7 @@ interface Options {
 export class PuppeteerBrowser implements BaseBrowser {
   private currentLetter = '';
   private currentPage: Page | undefined;
-  private avatar: number;
+  private avatar: number | string | undefined;
   private onGetAnswers: () => ICategoryAnswers;
   private onClearAnswer: () => void;
 
@@ -32,11 +32,43 @@ export class PuppeteerBrowser implements BaseBrowser {
 
   private async changeAvatar() {
     try {
-      if (this.avatar === 0) return;
-    } catch (error) {}
+      const avatar = Number(this.avatar);
+      if (avatar === 0) return;
+    } catch (error) {
+      browserLog.error('Failed to change avatar.', String(error));
+    }
   }
 
-  private async clearInput(input) {
+  private async changeUsername() {
+    try {
+      if (!this.currentPage) {
+        throw Error('NO CURRENT PAGE');
+      }
+
+      const username = process.env.GAME_USERNAME;
+      if (!username) {
+        browserLog.warn(
+          'Username not defined. A random name created by the game will be used.'
+        );
+        return;
+      }
+
+      const usernameInput = await this.currentPage.waitForXPath(
+        constants.USERNAME_INPUT
+      );
+
+      if (!usernameInput) {
+        throw Error("COULDN'T FIND INPUT");
+      }
+
+      await this.clearInput(usernameInput);
+      await usernameInput.type(username);
+    } catch (error) {
+      browserLog.error('Failed to change username.', String(error));
+    }
+  }
+
+  private async clearInput(input: ElementHandle<any>) {
     if (!this.currentPage) {
       throw Error('NO CURRENT PAGE');
     }
@@ -67,15 +99,7 @@ export class PuppeteerBrowser implements BaseBrowser {
         hidden: true,
       });
 
-      const usernameInput = await this.currentPage.waitForXPath(
-        constants.USERNAME_INPUT
-      );
-      if (!usernameInput) {
-        throw Error("COULDN'T FIND INPUT");
-      }
-
-      await this.clearInput(usernameInput);
-      await usernameInput.type('Toichi');
+      await this.changeUsername();
       await this.changeAvatar();
 
       const playButton = await this.currentPage.waitForXPath(
@@ -166,7 +190,9 @@ export class PuppeteerBrowser implements BaseBrowser {
       const buttonTextValue = buttonTextContent.remoteObject().value;
       if (
         buttonTextValue &&
-        String(buttonTextValue).toUpperCase() !== constants.READY_BUTTON_TEXT
+        !constants.READY_BUTTON_TEXTS.includes(
+          String(buttonTextValue).toUpperCase()
+        )
       )
         return;
 
@@ -230,14 +256,13 @@ export class PuppeteerBrowser implements BaseBrowser {
       const buttonTextValue = buttonTextContent.remoteObject().value;
       if (!buttonTextValue) return;
 
-      switch (String(buttonTextValue).toUpperCase()) {
-        case 'STOP!':
-          const answers = this.onGetAnswers();
-          const filteredAnswers = filterAnswers(this.currentLetter, answers);
-          await this.writeAnswers(filteredAnswers);
-          break;
-        case 'AVALIAR':
-          break;
+      const buttonText = String(buttonTextValue).toUpperCase();
+
+      if (constants.STOP_BUTTON_TEXTS.includes(buttonText)) {
+        const answers = this.onGetAnswers();
+        const filteredAnswers = filterAnswers(this.currentLetter, answers);
+        await this.writeAnswers(filteredAnswers);
+      } else if (constants.VALIDATE_BUTTON_TEXTS.includes(buttonText)) {
       }
     } catch (error) {
       browserLog.error('Failed to detect button state', String(error));
@@ -268,7 +293,6 @@ export class PuppeteerBrowser implements BaseBrowser {
       });
 
       const pages = await browser.pages();
-
       const page = pages.length ? pages[0] : await browser.newPage();
 
       const gameLang = constants.GAME_LANGUAGES.find(
