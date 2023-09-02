@@ -22,6 +22,11 @@ export const LOADING_SCREEN = '//*[@class="load"]';
 export const USERNAME_INPUT = '//*[@class="perfil"]//input';
 export const PLAY_BUTTON =
   '//*[@class="actions"]/button[@class="bt-yellow icon-exclamation"]';
+export const AVATAR_EDIT_BUTTON = '//button[@class="edit"]';
+export const AVATAR_ICON = (x: number) => `//*[@class="avatar avt${x}"]`;
+export const AVATAR_CONFIRM_BUTTON = '//*[@class="buttons"]/button';
+export const FADE_ANIMATION =
+  '//*[@class="popup-enter-done" or @class="popup-exit popup-exit-active"]';
 
 // COMMON ELEMENTS
 export const LETTER = '//*[@id="letter"]/span';

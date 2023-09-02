@@ -13,8 +13,6 @@ import { AnswersController } from './controllers/AnswersController';
 import { initializeServer } from './fakeChat';
 import { normalizeCategory } from './utilities/utils';
 
-const USE_FAKE_TEST_CHAT = false;
-
 const answersManager = new AnswersController();
 
 function handleMessage(message: string) {
@@ -53,6 +51,7 @@ function addAnswer(username: string, rawMessage: string) {
 async function main() {
   try {
     const browser = new PuppeteerBrowser({
+      avatar: process.env.GAME_AVATAR_ID,
       onGetAnswers: () => answersManager.getAnswers(),
       onClearAnswer: () => answersManager.clearAnswers(),
     });
@@ -64,7 +63,7 @@ async function main() {
       addAnswer(user, message);
     });
 
-    if (USE_FAKE_TEST_CHAT) {
+    if (process.env.ENABLE_TEST_CHAT === 'true') {
       initializeServer({
         onMessage: addAnswer,
       });
@@ -72,6 +71,7 @@ async function main() {
 
     await client.connect();
   } catch (error) {
+    await client.disconnect();
     console.error(error);
   }
 }

@@ -32,8 +32,43 @@ export class PuppeteerBrowser implements BaseBrowser {
 
   private async changeAvatar() {
     try {
-      const avatar = Number(this.avatar);
-      if (avatar === 0) return;
+      const avatarID = Number(this.avatar);
+      if (avatarID === 0) return;
+
+      if (!this.currentPage) {
+        throw Error('NO CURRENT PAGE');
+      }
+
+      const editButton = await this.currentPage.waitForXPath(
+        constants.AVATAR_EDIT_BUTTON
+      );
+      if (!editButton) {
+        throw Error("COULDN'T FIND EDIT AVATAR BUTTON");
+      }
+
+      await editButton.click();
+      const avatarPath = constants.AVATAR_ICON(avatarID);
+
+      const avatar = await this.currentPage.waitForXPath(avatarPath);
+      if (!avatar) {
+        throw Error("COULDN'T FIND AVATAR ICON");
+      }
+      await avatar.click();
+
+      const confirmButton = await this.currentPage.waitForXPath(
+        constants.AVATAR_CONFIRM_BUTTON
+      );
+      if (!confirmButton) {
+        throw Error("COULDN'T FIND CONFIRM AVATAR BUTTON");
+      }
+
+      await confirmButton.click();
+
+      await this.currentPage.waitForXPath(constants.FADE_ANIMATION, {
+        hidden: true,
+      });
+
+      gameLog.info(`Avatar set to ${avatarID}`);
     } catch (error) {
       browserLog.error('Failed to change avatar.', String(error));
     }
@@ -63,6 +98,7 @@ export class PuppeteerBrowser implements BaseBrowser {
 
       await this.clearInput(usernameInput);
       await usernameInput.type(username);
+      gameLog.info(`Username set to ${username}`);
     } catch (error) {
       browserLog.error('Failed to change username.', String(error));
     }
