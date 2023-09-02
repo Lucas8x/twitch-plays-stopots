@@ -326,6 +326,7 @@ export class PuppeteerBrowser implements BaseBrowser {
       const browser = await puppeteer.launch({
         headless: false,
         timeout: 0,
+        ignoreDefaultArgs: ['--enable-automation'],
       });
 
       const pages = await browser.pages();
