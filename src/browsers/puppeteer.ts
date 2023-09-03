@@ -154,7 +154,7 @@ export class PuppeteerBrowser implements BaseBrowser {
     }
   }
 
-  public async writeAnswers(data: IGetAnswersResponse) {
+  private async writeAnswers(data: IGetAnswersResponse) {
     try {
       if (!this.currentPage) {
         throw Error('NO CURRENT PAGE');
@@ -203,7 +203,7 @@ export class PuppeteerBrowser implements BaseBrowser {
     }
   }
 
-  public validateAnswers() {
+  private validateAnswers() {
     try {
     } catch (error) {
       browserLog.error('Failed to validate answers.', String(error));
@@ -326,6 +326,7 @@ export class PuppeteerBrowser implements BaseBrowser {
       const browser = await puppeteer.launch({
         headless: false,
         timeout: 0,
+        args: ['--start-maximized'],
         ignoreDefaultArgs: ['--enable-automation'],
       });
 
