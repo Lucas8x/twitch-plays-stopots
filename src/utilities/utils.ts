@@ -2,6 +2,10 @@ export function isAValidUsername(string: string): boolean {
   return string.length >= 2 && string.length <= 15;
 }
 
+export function isAValidAvatar(id: number): boolean {
+  return id >= 0 && id <= 36;
+}
+
 export function filterAnswers(letter: string, answers: ICategoryAnswers) {
   if (!letter) return {};
   letter = letter.trim().toLowerCase();

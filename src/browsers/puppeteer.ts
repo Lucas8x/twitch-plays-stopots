@@ -6,6 +6,7 @@ import * as constants from '../utilities/constants';
 import { Logger } from '../utilities/logger';
 import {
   filterAnswers,
+  isAValidAvatar,
   isAValidUsername,
   normalizeCategory,
 } from '../utilities/utils';
@@ -41,6 +42,13 @@ export class PuppeteerBrowser implements BaseBrowser {
 
       if (!this.currentPage) {
         throw Error('NO CURRENT PAGE');
+      }
+
+      if (!isAValidAvatar(avatarID)) {
+        browserLog.warn(
+          'The defined avatar is not valid, avatar id must be between 0 and 36. Defaulting to 0'
+        );
+        return;
       }
 
       const editButton = await this.currentPage.waitForXPath(
