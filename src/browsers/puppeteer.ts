@@ -4,7 +4,11 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
 import * as constants from '../utilities/constants';
 import { Logger } from '../utilities/logger';
-import { filterAnswers, normalizeCategory } from '../utilities/utils';
+import {
+  filterAnswers,
+  isAValidUsername,
+  normalizeCategory,
+} from '../utilities/utils';
 
 const gameLog = new Logger(' [GME] ', '#FFBF3F');
 const browserLog = new Logger(' [BSR] ', '#019D30');
@@ -84,6 +88,13 @@ export class PuppeteerBrowser implements BaseBrowser {
       if (!username) {
         browserLog.warn(
           'Username not defined. A random name created by the game will be used.'
+        );
+        return;
+      }
+
+      if (!isAValidUsername(username)) {
+        browserLog.warn(
+          'The defined username must be between 2 and 15 characters long. A random name created by the game will be used.'
         );
         return;
       }
